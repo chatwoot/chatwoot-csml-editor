@@ -3,12 +3,34 @@ export default {
   data() {
     return { csmlContent: "" };
   },
+  mounted() {
+    window.addEventListener("message", (event) => {
+      if (!this.isJSONValid(event.data)) {
+        return;
+      }
+
+      const eventData = JSON.parse(event.data);
+      if (eventData.event === "editorContext") {
+        this.csmlContent = eventData.data;
+      }
+    });
+  },
   watch: {
     csmlContent() {
       window.parent.postMessage(
         "chatwoot-csml-editor:update" + this.csmlContent,
         "*"
       );
+    },
+  },
+  methods: {
+    isJSONValid(str) {
+      try {
+        JSON.parse(str);
+      } catch (e) {
+        return false;
+      }
+      return true;
     },
   },
 };
